@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/dghubble/go-twitter/twitter"
@@ -12,8 +13,8 @@ import (
 )
 
 func main() {
-	config := oauth1.NewConfig("", "")
-	token := oauth1.NewToken("", "")
+	config := oauth1.NewConfig(os.Getenv("TWITTER_API_KEY"), os.Getenv("TWITTER_API_KEY_SECRET"))
+	token := oauth1.NewToken(os.Getenv("TWITTER_ACCESS_TOKEN"), os.Getenv("TWITTER_ACCESS_TOKEN_SECRET"))
 	httpClient := config.Client(oauth1.NoContext, token)
 
 	// Twitter client
@@ -32,8 +33,8 @@ func main() {
 			fmt.Println(tweet.Text)
 			fmt.Println(briefingTime)
 
-			accountSid := ""
-			authToken := ""
+			accountSid := os.Getenv("TWILIO_ACCOUNT_SID")
+			authToken := os.Getenv("TWILIO_AUTH_TOKEN")
 			urlStr := "https://api.twilio.com/2010-04-01/Accounts/" + accountSid + "/Messages.json"
 
 			// Pack up the data for our message
