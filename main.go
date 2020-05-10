@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
@@ -85,17 +86,28 @@ func main() {
 				log.Fatalf("Unable to retrieve Calendar client: %v", err)
 			}
 
+			timeNow := time.Now()
+			briefingStartTimeFormatted := fmt.Sprintf("%d-%02d-%02dT"+briefingTime[0:5]+":00-04:00", timeNow.Year(), timeNow.Month(), timeNow.Day())
+			briefingTimeParsed, _ := time.Parse(
+				time.RFC3339,
+				briefingStartTimeFormatted)
+
+			briefingEndTimeFormatted := briefingTimeParsed.Add(time.Hour).Format("2006-01-02T15:04:05-07:00")
+			fmt.Println(string(briefingStartTimeFormatted))
+			fmt.Println(string(briefingEndTimeFormatted))
+
 			event := &calendar.Event{
-				Summary:     "Google I/O 2015",
-				Location:    "800 Howard St., San Francisco, CA 94103",
-				Description: "A chance to hear more about Google's developer products.",
+				Summary:     "Governor Cuomo Daily Briefing",
+				Location:    "ny.gov",
+				Description: "NY Governor Andrew Cuomo's daily coronavirus briefing ",
 				Start: &calendar.EventDateTime{
-					DateTime: "2020-05-28T09:00:00-07:00",
-					TimeZone: "America/Los_Angeles",
+					DateTime: briefingStartTimeFormatted,
+					TimeZone: "America/New_York",
 				},
+
 				End: &calendar.EventDateTime{
-					DateTime: "2020-05-28T17:00:00-07:00",
-					TimeZone: "America/Los_Angeles",
+					DateTime: briefingEndTimeFormatted,
+					TimeZone: "America/New_York",
 				},
 			}
 
