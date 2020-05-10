@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -10,6 +12,8 @@ import (
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/calendar/v3"
 )
 
 func main() {
@@ -63,6 +67,44 @@ func main() {
 			} else {
 				fmt.Println(resp.Status)
 			}
+
+			googleCredentials, err := ioutil.ReadFile("credentials.json")
+			if err != nil {
+				log.Fatalf("Unable to read client secret file: %v", err)
+			}
+
+			googleConfig, err := google.ConfigFromJSON(googleCredentials, calendar.CalendarReadonlyScope)
+			if err != nil {
+				log.Fatalf("Unable to parse client secret file to config: %v", err)
+			}
+
+			googleClient := getGoogleClient(googleConfig)
+
+			srv, err := calendar.New(googleClient)
+			if err != nil {
+				log.Fatalf("Unable to retrieve Calendar client: %v", err)
+			}
+
+			event := &calendar.Event{
+				Summary:     "Google I/O 2015",
+				Location:    "800 Howard St., San Francisco, CA 94103",
+				Description: "A chance to hear more about Google's developer products.",
+				Start: &calendar.EventDateTime{
+					DateTime: "2020-05-28T09:00:00-07:00",
+					TimeZone: "America/Los_Angeles",
+				},
+				End: &calendar.EventDateTime{
+					DateTime: "2020-05-28T17:00:00-07:00",
+					TimeZone: "America/Los_Angeles",
+				},
+			}
+
+			calendarID := "primary"
+			event, err = srv.Events.Insert(calendarID, event).Do()
+			if err != nil {
+				log.Fatalf("Unable to create event. %v\n", err)
+			}
+			fmt.Printf("Event created: %s\n", event.HtmlLink)
 
 			return
 		}
