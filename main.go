@@ -13,23 +13,43 @@ import (
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
+	"github.com/robfig/cron"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/calendar/v3"
 )
 
+var timezone = "America/New_York"
+
 func main() {
+
+	c := cron.New()
+	c.AddFunc("CRON_TZ="+timezone+" 30 10 * * *", func() {
+		log.Println("Starting")
+		getBriefingTimeAndCreateEvent()
+	})
+
+	c.Start()
+
+	// Added time to see output
+	time.Sleep(60 * time.Second)
+
+	c.Stop()
+}
+
+func getBriefingTimeAndCreateEvent() {
 	config := oauth1.NewConfig(os.Getenv("TWITTER_API_KEY"), os.Getenv("TWITTER_API_KEY_SECRET"))
 	token := oauth1.NewToken(os.Getenv("TWITTER_ACCESS_TOKEN"), os.Getenv("TWITTER_ACCESS_TOKEN_SECRET"))
 	httpClient := config.Client(oauth1.NoContext, token)
 
 	// Twitter client
-	client := twitter.NewClient(httpClient)
+	twitterClient := twitter.NewClient(httpClient)
 
 	// Search Tweets
-	tweets, _, _ := client.Timelines.UserTimeline(&twitter.UserTimelineParams{
+	tweets, _, _ := twitterClient.Timelines.UserTimeline(&twitter.UserTimelineParams{
 		ScreenName: "NYGovCuomo",
 		Count:      100,
 	})
+	fmt.Println("Tweets retrieved")
 
 	for _, tweet := range tweets {
 		if strings.Contains(tweet.Text, "briefing") && strings.Contains(tweet.Text, "ET") {
@@ -64,6 +84,7 @@ func main() {
 				err := decoder.Decode(&data)
 				if err == nil {
 					fmt.Println(data["sid"])
+					fmt.Println("Text message sent")
 				}
 			} else {
 				fmt.Println(resp.Status)
@@ -102,12 +123,12 @@ func main() {
 				Description: "NY Governor Andrew Cuomo's daily coronavirus briefing ",
 				Start: &calendar.EventDateTime{
 					DateTime: briefingStartTimeFormatted,
-					TimeZone: "America/New_York",
+					TimeZone: timezone,
 				},
 
 				End: &calendar.EventDateTime{
 					DateTime: briefingEndTimeFormatted,
-					TimeZone: "America/New_York",
+					TimeZone: timezone,
 				},
 			}
 
