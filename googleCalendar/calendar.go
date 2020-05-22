@@ -1,4 +1,4 @@
-package main
+package googleCalendar
 
 import (
 	"encoding/json"
@@ -15,8 +15,8 @@ import (
 	"google.golang.org/api/calendar/v3"
 )
 
-// Retrieve a token, saves the token, then returns the generated client.
-func getGoogleClient(config *oauth2.Config) *http.Client {
+// GetGoogleClient retrieves a token, saves the token, then returns the generated client.
+func GetGoogleClient(config *oauth2.Config) *http.Client {
 	// The file token.json stores the user's access and refresh tokens, and is
 	// created automatically when the authorization flow completes for the first
 	// time.
@@ -81,7 +81,7 @@ func start() {
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
-	client := getGoogleClient(config)
+	client := GetGoogleClient(config)
 
 	srv, err := calendar.New(client)
 	if err != nil {
