@@ -26,14 +26,42 @@ func FindCuomoBriefingTime() string {
 	fmt.Println("Tweets retrieved")
 
 	for _, tweet := range tweets {
-		if strings.Contains(tweet.Text, "briefing") && strings.Contains(tweet.Text, "ET") {
-			timeEndIndex := strings.Index(tweet.Text, "ET")
-			briefingTime := tweet.Text[timeEndIndex-8 : timeEndIndex+2]
-			fmt.Println(tweet.Text)
-			fmt.Println(briefingTime)
-
+		briefingTime := FindBriefingTimeInString(tweet.Text)
+		if briefingTime != "" {
 			return briefingTime
 		}
+	}
+
+	return ""
+}
+
+// FindBriefingTimeInString returns the time of a briefing from a string
+func FindBriefingTimeInString(tweet string) string {
+	if !strings.Contains(tweet, "briefing") {
+		return ""
+	}
+
+	fmt.Println(tweet)
+
+	etIndex := strings.Index(tweet, "ET")
+	if etIndex != -1 {
+		briefingTime := tweet[etIndex-8 : etIndex+2]
+		fmt.Println(briefingTime)
+		return briefingTime
+	}
+
+	pmIndex := strings.Index(tweet, "PM")
+	if pmIndex != -1 {
+		briefingTime := tweet[pmIndex-5 : pmIndex+2]
+		fmt.Println(briefingTime)
+		return briefingTime
+	}
+
+	amIndex := strings.Index(tweet, "AM")
+	if amIndex != -1 {
+		briefingTime := tweet[amIndex-5 : amIndex+2]
+		fmt.Println(briefingTime)
+		return briefingTime
 	}
 
 	return ""
